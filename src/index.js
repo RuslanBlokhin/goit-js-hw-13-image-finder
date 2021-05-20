@@ -7,6 +7,7 @@ import createMarkup from './js/createMarkup.js';
 const refs = {
   gallery: document.querySelector('.gallery'),
   searchForm: document.querySelector('.search-form'),
+  formContainer: document.querySelector('.container'),
 };
 
 const loadMoreBtn = new LoadMoreBtn({
@@ -27,6 +28,7 @@ function getUsers(e) {
   if (apiServise.query === '') return;
 
   loadMoreBtn.show();
+  clearPicturesContainer();
   apiServise.resetPage();
   fetchImages();
 }
@@ -36,7 +38,13 @@ function fetchImages() {
   apiServise.fetchItems().then(data => {
     renderItems(data);
     loadMoreBtn.enable();
+
+    window.scrollTo({
+      top: document.documentElement.offsetHeight,
+      behavior: 'smooth',
+    });
   });
+
   // .catch(err => {
   //   renderError(err);
   //   loadMoreBtn.hide();
@@ -46,7 +54,12 @@ function fetchImages() {
 function renderItems({ hits }) {
   const markup = createMarkup(hits);
   refs.gallery.insertAdjacentHTML('beforeend', markup);
+
   // refs.error.textContent = '';
+}
+
+function clearPicturesContainer() {
+  refs.gallery.innerHTML = '';
 }
 
 // function renderError(err) {

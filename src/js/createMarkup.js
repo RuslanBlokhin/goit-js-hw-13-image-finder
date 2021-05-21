@@ -1,10 +1,10 @@
 export default items =>
   items
     .map(
-      ({ webformatURL, comments, downloads, likes, views, tags }) => `
+      ({ webformatURL, comments, downloads, likes, views, tags, largeImageURL }) => `
       
 <div class='photo-card'>
-  <img src='${webformatURL}' alt='${tags}' width="400" height="300" />
+  <img src='${webformatURL}' alt='${tags}' data-sourse="${largeImageURL}" width="400" height="300" />
 
   <div class='stats'>
     <p class='stats-item'>

@@ -4,6 +4,13 @@ import ApiServise from './js/api-servise.js';
 import LoadMoreBtn from './js/load-more-btn.js';
 import createMarkup from './js/createMarkup.js';
 
+import { alert, error } from '@pnotify/core';
+import '@pnotify/core/dist/PNotify.css';
+import '@pnotify/core/dist/BrightTheme.css';
+
+import * as basicLightbox from 'basiclightbox';
+import 'basiclightbox/dist/basicLightbox.min.css';
+
 const refs = {
   gallery: document.querySelector('.gallery'),
   searchForm: document.querySelector('.search-form'),
@@ -25,31 +32,38 @@ function getUsers(e) {
 
   apiServise.query = e.currentTarget.elements.query.value;
 
-  if (apiServise.query === '') return;
+  if (apiServise.query === '') return alert('Введите запрос!');
 
   loadMoreBtn.show();
   clearPicturesContainer();
   apiServise.resetPage();
-  fetchImages();
+  fetchImages(false); //flag
 }
 
-function fetchImages() {
+function fetchImages(shouldScroll = true) {
+  //flag
+
   loadMoreBtn.disable();
-  apiServise.fetchItems().then(data => {
-    renderItems(data);
-    loadMoreBtn.enable();
-
-    window.scrollTo({
-      top: document.documentElement.offsetHeight,
-      behavior: 'smooth',
+  apiServise
+    .fetchItems()
+    .then(data => {
+      renderItems(data);
+      loadMoreBtn.enable();
+      if (!shouldScroll) return;
+      window.scrollTo({
+        top: document.documentElement.offsetHeight,
+        behavior: 'smooth',
+      });
+    })
+    .catch(error => {
+      renderError(error);
+      loadMoreBtn.hide();
     });
-  });
-
-  // .catch(err => {
-  //   renderError(err);
-  //   loadMoreBtn.hide();
-  // });
 }
+
+const renderError = error => {
+  alert({ text: error });
+};
 
 function renderItems({ hits }) {
   const markup = createMarkup(hits);
@@ -62,7 +76,11 @@ function clearPicturesContainer() {
   refs.gallery.innerHTML = '';
 }
 
-// function renderError(err) {
-//   refs.gallery.innerHTML = '';
-//   refs.error.textContent = err;
-// }
+refs.gallery.addEventListener('click', e => {
+  if (e.target.tagName !== 'IMG') return;
+  const largeImageURL = e.target.dataset.sourse;
+  const instance = basicLightbox.create(`
+    <img src="${largeImageURL}" width="800" height="600">
+`);
+  instance.show();
+});
